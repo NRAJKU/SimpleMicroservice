@@ -1,0 +1,82 @@
+format_version: 10
+pipelines:
+  Test_Build_Deploy:
+    group: MyGroup
+    label_template: ${COUNT}
+    lock_behavior: none
+    display_order: -1
+    materials:
+      git-b8df1cb:
+        git: https://github.com/NRAJKU/SimpleMicroservice.git
+        shallow_clone: false
+        auto_update: true
+        branch: master
+    stages:
+      - Test_and_Build:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: success
+            allow_only_on_success: false
+          jobs:
+            clean-build:
+              timeout: 0
+              tasks:
+                - exec:
+                    arguments:
+                      - -c
+                      - <<
+                      - ./gradlew clean build --stacktrace
+                    command: /bin/bash
+                    run_if: passed
+      - package_and_push:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: success
+            allow_only_on_success: false
+          jobs:
+            clean-build:
+              timeout: 0
+              tasks:
+                - exec:
+                    arguments:
+                      - -c
+                      - <<
+                      - docker build --iidfile image.txt -t registry.heroku.com/$HEROKU_APP_NAME/web:latest .
+                    command: /bin/bash
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - -c
+                      - <<
+                      - docker login --username=_ --password=$HEROKU_TOKEN registry.heroku.com
+                    command: /bin/bash
+                    run_if: passed
+                - exec:
+                    arguments:
+                      - -c
+                      - <<
+                      - docker push registry.heroku.com/$HEROKU_APP_NAME/web:latest
+                    command: /bin/bash
+                    run_if: passed
+      - deploye:
+          fetch_materials: true
+          keep_artifacts: false
+          clean_workspace: false
+          approval:
+            type: success
+            allow_only_on_success: false
+          jobs:
+            deploye-to-heroku:
+              timeout: 0
+              tasks:
+                - exec:
+                    arguments:
+                      - -c
+                      - <<
+                      - 'curl -X PATCH https://api.heroku.com/apps/$HEROKU_APP_NAME/formation --header "Content-Type: application/json" --header "Accept: application/vnd.heroku+json; version=3.docker-releases" --header "Authorization: Bearer ${HEROKU_TOKEN}" --data '{ "updates": [ { "type": "web", "docker_image": "'$(cat image.txt)'" } ] }'
+                    command: /bin/bash
+                    run_if: passed
