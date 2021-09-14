@@ -15,7 +15,7 @@ public class SimpleMicroserviceApplication {
 
     @GetMapping("/api/v1/helo")
     public String helloWorls(){
-        return "Helo World!";
+        return "Helo World!!";
     }
 
 }
