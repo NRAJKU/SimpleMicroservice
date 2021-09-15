@@ -44,22 +44,22 @@ pipelines:
                 - exec:
                     arguments:
                       - -c
-                      - <<
-                      - docker build --iidfile image.txt -t registry.heroku.com/$HEROKU_APP_NAME/web:latest .
+                      - >
+                        docker build --iidfile image.txt -t registry.heroku.com/$HEROKU_APP_NAME/web:latest .
                     command: /bin/bash
                     run_if: passed
                 - exec:
                     arguments:
                       - -c
-                      - <<
-                      - docker login --username=_ --password=$HEROKU_TOKEN registry.heroku.com
+                      - >
+                        docker login --username=_ --password=$HEROKU_TOKEN registry.heroku.com
                     command: /bin/bash
                     run_if: passed
                 - exec:
                     arguments:
                       - -c
-                      - <<
-                      - docker push registry.heroku.com/$HEROKU_APP_NAME/web:latest
+                      - >
+                        docker push registry.heroku.com/$HEROKU_APP_NAME/web:latest
                     command: /bin/bash
                     run_if: passed
       - deploye:
