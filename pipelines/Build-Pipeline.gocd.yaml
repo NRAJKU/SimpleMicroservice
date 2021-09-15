@@ -26,8 +26,8 @@ pipelines:
                 - exec:
                     arguments:
                       - -c
-                      - <<
-                      - ./gradlew clean build --stacktrace
+                      - >
+                        ./gradlew clean build --stacktrace
                     command: /bin/bash
                     run_if: passed
       - package_and_push:
