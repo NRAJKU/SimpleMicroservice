@@ -9,7 +9,7 @@ pipelines:
       git-b8df1cb:
         git: https://github.com/NRAJKU/SimpleMicroservice.git
         shallow_clone: false
-        auto_update: true
+        auto_update: false
         branch: master
     stages:
       - Test_and_Build:
